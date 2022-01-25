@@ -5,4 +5,6 @@ using UnityEngine;
 interface IControllable
 {
     void youveBeenTapped();
+    void MoveTo(Vector3 destination);
+    void Update();
 }
