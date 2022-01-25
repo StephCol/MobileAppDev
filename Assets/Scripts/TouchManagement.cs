@@ -5,7 +5,7 @@ using UnityEngine;
 public class TouchManagement : MonoBehaviour
 {
     IControllable selectedObject;
-    IControllable starting_distance_to_selected_object;
+    float starting_distance_to_selected_object;
 
     // Start is called before the first frame update
     void Start()
@@ -34,7 +34,7 @@ public class TouchManagement : MonoBehaviour
                 {
                     objectHit.youveBeenTapped();
                     selectedObject = objectHit;
-// starting_distance_to_selected_object = Vector3.Distance(Camera.main.transform.position, info.transform.position);
+                    starting_distance_to_selected_object = Vector3.Distance(Camera.main.transform.position, info.transform.position);
                 }
             }
 
@@ -45,7 +45,8 @@ public class TouchManagement : MonoBehaviour
 
                     break;
                 case TouchPhase.Moved:
-                    
+                    Ray new_positional_ray = Camera.main.ScreenPointToRay(Input.touches[0].position);
+                    selectedObject.MoveTo(new_positional_ray.GetPoint(starting_distance_to_selected_object));
                     break;
                 case TouchPhase.Stationary:
 
