@@ -2,23 +2,41 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SphereControl : MonoBehaviour, IControllable
+public class SphereControl : MonoBehaviour, IInteractable
 {
+    Renderer my_renderer;
+    bool is_selected = false;
     private Vector3 drag_position;
 
-    public void MoveTo(Vector3 destination)
+    void Start()
+    {
+        my_renderer = GetComponent<Renderer>();
+    }
+
+    public void dragActivated(Vector3 destination)
     {
         drag_position = destination;
     }
 
-    public void youveBeenTapped()
+    public void tapActivated()
     {
-        transform.position += Vector3.right;
+        
     }
 
     public void Update()
     {
-        transform.position = Vector3.Lerp(transform.position, drag_position, 0.05f);
+        //if (is_selected)
+         //   transform.position = drag_position;
     }
 
+    public void select_toggle(bool selected)
+    {
+        is_selected = selected;
+
+        if (is_selected)
+            my_renderer.material.color = Color.red;
+        else
+            my_renderer.material.color = Color.white;
+
+    }
 }
