@@ -5,6 +5,6 @@ using UnityEngine;
 public interface IInteractable 
 {
     void tapActivated();
-    void dragActivated(Vector3 destination); 
+    void dragActivated(Ray our_ray, float destination); 
     void select_toggle(bool selected);
 }

@@ -8,6 +8,7 @@ public class CubeControl : MonoBehaviour, IInteractable
     Renderer my_renderer;
     bool is_selected = false;
     private Vector3 drag_position;
+    MeshRenderer plane_renderer;
 
     //submission of project in the form of 5 or 6 projects
     //test scene or project so files can be pulled onto the project
@@ -16,18 +17,23 @@ public class CubeControl : MonoBehaviour, IInteractable
     void Start()
     {
         my_renderer = GetComponent<Renderer>();
+        drag_position = transform.position;
+        Transform plane = transform.Find("Plane");
+        plane.GetComponent<Collider>().enabled = false;
+        plane_renderer = plane.GetComponent<MeshRenderer>();
+        plane_renderer.forceRenderingOff = true;
+
     }
 
-    public void dragActivated(Vector3 destination)
+    public void dragActivated(Ray our_ray, float destination)
     {
-        drag_position = destination;
-        //transform.position = Vector3.Lerp(transform.position, drag_position, 0.9f);
+        drag_position = our_ray.GetPoint(destination);
     }
 
     public void Update()
     {
         if(is_selected)
-            transform.position = Vector3.Lerp(transform.position, drag_position, 0.9f); ;
+        transform.position = Vector3.Lerp(transform.position, drag_position, 0.5f);
     }
 
     public void tapActivated()
@@ -41,9 +47,9 @@ public class CubeControl : MonoBehaviour, IInteractable
         is_selected = selected;
 
         if (is_selected)
-            my_renderer.material.color = Color.red;
+            plane_renderer.forceRenderingOff = false;
         else
-            my_renderer.material.color = Color.white;
+            plane_renderer.forceRenderingOff = true;
 
     }
 

@@ -46,7 +46,7 @@ public class GestureIdentifier : MonoBehaviour
                     if ((tap_timer > MAX_ALLOWED_TAP_TIME) && has_moved)
                     {
                         foreach (ITouchController manager in managers)
-                            (manager as ITouchController).drag(first_touch.position, last_touch.position, Camera.main.transform.position.z);
+                            (manager as ITouchController).drag(first_touch.position);
                     }                             
                     break;
 
