@@ -8,32 +8,24 @@ public class TouchManagement : MonoBehaviour, ITouchController
     float starting_distance_to_selected_object;
     Ray our_ray;
 
-    public void drag(Vector2 position1, Vector2 position2, float relative_distance)
-    {
-        print("Im the manager and I recieved a drag from gesture");
 
+    public void drag(Vector2 current_position)
+    {
         if (selectedObject != null)
         {
-                print("Trying to drag");
-                print(selectedObject);
-                selectedObject.dragActivated(our_ray.GetPoint(starting_distance_to_selected_object));
-                
+            our_ray = Camera.main.ScreenPointToRay(current_position);
+            selectedObject.dragActivated(our_ray, starting_distance_to_selected_object);
         }
-        else
-        {
-            print("Failed to drag");
-        }
+    }
 
-}
 
-    public void pinch(Vector2 current_position)
+    public void pinch(Vector2 position1, Vector2 position2, float relative_distance)
     {
         throw new System.NotImplementedException();
     }
 
     public void tap(Vector2 position)
     {
-        print("Im the manager and I recieved a tap from gesture");
 
         our_ray = Camera.main.ScreenPointToRay(position);
         RaycastHit hit_info;
