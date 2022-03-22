@@ -22,17 +22,42 @@ public class TouchManagement : MonoBehaviour, ITouchController
         }
     }
 
-    public void pinch(float relativeDistance) //relative d
+    public void pinch(float relativeDistance) 
     {
         if (!pinchStarted)
         {
-            startingScale = ((MonoBehaviour)selectedObject).transform.localScale;
+            if (selectedObject != null)
+                startingScale = ((MonoBehaviour)selectedObject).transform.localScale;
+            else
+                startingScale = Camera.main.transform.localScale;
+
             pinchStarted = true;
         }
 
         if (selectedObject != null)
             ((MonoBehaviour)selectedObject).transform.localScale = startingScale * relativeDistance;
+        
+    }
 
+    public void cameraPinch(Touch touch1, Touch touch2)
+    {
+        float ZoomMinBound = 20f;
+        float ZoomMaxBound = 110f;
+        float TouchZoomSpeed = 0.1f;
+
+        if (selectedObject == null)
+        {
+            Vector2 touch1Previous = touch1.position - touch1.deltaPosition;
+            Vector2 touch2Previous = touch2.position - touch2.deltaPosition;
+
+            float startingDistance = Vector2.Distance(touch1Previous, touch2Previous);
+            float currentDistance = Vector2.Distance(touch1.position, touch2.position);
+
+            float relativeDistance = startingDistance - currentDistance;
+
+            Camera.main.fieldOfView += relativeDistance * TouchZoomSpeed;
+            Camera.main.fieldOfView = Mathf.Clamp(Camera.main.fieldOfView, ZoomMinBound, ZoomMaxBound);
+        }
     }
 
     public void pinchEnded()
@@ -46,21 +71,21 @@ public class TouchManagement : MonoBehaviour, ITouchController
         if (!rotateStarted)
         {
             rotateStarted = true;
-            startingOrientaton = ((MonoBehaviour)selectedObject).transform.rotation;
+            if (selectedObject != null)
+                startingOrientaton = ((MonoBehaviour)selectedObject).transform.rotation;
         }
         else
         {
             angle = angle * Mathf.Rad2Deg;
-            ((MonoBehaviour)selectedObject).transform.rotation = startingOrientaton * Quaternion.AngleAxis(angle, Camera.main.transform.forward);
+            if (selectedObject != null)
+                ((MonoBehaviour)selectedObject).transform.rotation = startingOrientaton * Quaternion.AngleAxis(angle, Camera.main.transform.forward);
         }
-
     }
 
     public void rotateEnded()
     {
         rotateStarted = false;
     }
-
 
     public void tap(Vector2 position)
     {
@@ -97,5 +122,4 @@ public class TouchManagement : MonoBehaviour, ITouchController
 
         }
     }
-
 }

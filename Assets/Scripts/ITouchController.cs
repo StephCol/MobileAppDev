@@ -10,4 +10,6 @@ public interface ITouchController
     void pinchEnded();
     void rotate(float angle);
     void rotateEnded();
+    void cameraPinch(Touch first_touch, Touch second_touch);
+
 }

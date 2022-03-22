@@ -44,6 +44,9 @@ public class GestureIdentifier : MonoBehaviour
                         (manager as ITouchController).pinch(currentDistance / startingPinchDistance);
 
                     foreach (ITouchController manager in managers)
+                        (manager as ITouchController).cameraPinch(first_touch, second_touch);
+
+                    foreach (ITouchController manager in managers)
                         (manager as ITouchController).rotate(currentAngle - startingAngle);
                 }
 
