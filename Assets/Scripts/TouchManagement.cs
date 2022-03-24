@@ -5,15 +5,40 @@ using UnityEngine;
 public class TouchManagement : MonoBehaviour, ITouchController
 {
     IInteractable selectedObject;
+
+    //Objct drag
     float starting_distance_to_selected_object;
     Ray our_ray;
-    private Vector3 startingScale;
-    private bool pinchStarted = false;
-    public float rotatespeed = 50f;
-    private bool rotateStarted;
-    private Quaternion startingOrientaton;
 
-    public void drag(Vector2 current_position)
+    //Object scale
+    private Vector3 objectStartingScale;
+
+    //Object rotation
+    private Quaternion objectStartingOrientaton;
+
+    //Camera Rotation
+    private float xAngle = 0;
+    private float yAngle = 0;
+    private Vector3 firstpoint = new Vector3(0, 0, 0);
+    private Vector3 secondpoint = new Vector3(0, 0, 0);
+    float xAngTemp = 0;
+    float yAngTemp = 0;
+
+    //Object status
+    private bool objectScaleStarted = false;
+    private bool objectRotateStarted = false;
+
+    //Camera status
+    private bool cameraPanStarted;
+    private bool cameraRotateStarted;
+    private bool cameraZoomStarted;
+
+    void Start()
+    {
+        Camera.main.transform.rotation = Quaternion.Euler(yAngle, xAngle, 0.0f);
+    }
+
+    public void dragObject(Vector2 current_position)
     {
         if (selectedObject != null)
         {
@@ -22,31 +47,40 @@ public class TouchManagement : MonoBehaviour, ITouchController
         }
     }
 
-    public void pinch(float relativeDistance) 
+    public void scaleObject(float relativeDistance) 
     {
-        if (!pinchStarted)
+        if (!objectScaleStarted)
         {
             if (selectedObject != null)
-                startingScale = ((MonoBehaviour)selectedObject).transform.localScale;
+                objectStartingScale = ((MonoBehaviour)selectedObject).transform.localScale;
             else
-                startingScale = Camera.main.transform.localScale;
+                objectStartingScale = Camera.main.transform.localScale;
 
-            pinchStarted = true;
+            objectScaleStarted = true;
         }
 
         if (selectedObject != null)
-            ((MonoBehaviour)selectedObject).transform.localScale = startingScale * relativeDistance;
+            ((MonoBehaviour)selectedObject).transform.localScale = objectStartingScale * relativeDistance;
         
     }
 
-    public void cameraPinch(Touch touch1, Touch touch2)
+    public void objectScaleEnded()
     {
-        float ZoomMinBound = 20f;
-        float ZoomMaxBound = 110f;
+        objectScaleStarted = false;
+    }
+
+    public void cameraZoom(Touch touch1, Touch touch2)
+    {
+        float ZoomMinBound = 10f;
+        float ZoomMaxBound = 150f;
         float TouchZoomSpeed = 0.1f;
 
         if (selectedObject == null)
         {
+
+            if (cameraZoomStarted == false)
+                cameraZoomStarted = true;
+
             Vector2 touch1Previous = touch1.position - touch1.deltaPosition;
             Vector2 touch2Previous = touch2.position - touch2.deltaPosition;
 
@@ -54,37 +88,85 @@ public class TouchManagement : MonoBehaviour, ITouchController
             float currentDistance = Vector2.Distance(touch1.position, touch2.position);
 
             float relativeDistance = startingDistance - currentDistance;
-
-            Camera.main.fieldOfView += relativeDistance * TouchZoomSpeed;
-            Camera.main.fieldOfView = Mathf.Clamp(Camera.main.fieldOfView, ZoomMinBound, ZoomMaxBound);
+            if(startingDistance > 400)
+            {
+                Camera.main.fieldOfView += relativeDistance * TouchZoomSpeed;
+                Camera.main.fieldOfView = Mathf.Clamp(Camera.main.fieldOfView, ZoomMinBound, ZoomMaxBound);
+            }
         }
     }
 
-    public void pinchEnded()
+    public void cameraZoomEnded()
     {
-        pinchStarted = false;
+        cameraZoomStarted = false;
     }
 
-    public void rotate(float angle)
+    public void cameraPan(Vector3 hit_position, Vector3 camera_position, Vector3 current_position)
+    {
+        if (selectedObject == null)
+        {
+            if(cameraPanStarted == false)
+                cameraPanStarted = true;
+
+            current_position.z = hit_position.z = camera_position.y;
+            Vector3 direction = Camera.main.ScreenToWorldPoint(current_position) - Camera.main.ScreenToWorldPoint(hit_position);
+            direction = direction * -1;
+            Vector3 position = camera_position + (direction*3);
+            Camera.main.transform.position = Vector3.Lerp(position, camera_position, Time.deltaTime);
+        }
+    }
+
+    public void cameraPanEnded()
+    {
+        cameraPanStarted = false;
+    }
+
+    public void cameraRotate(Vector3 first_touch, Vector3 second_touch)
+    {
+        if (selectedObject == null)
+        {
+            if (cameraRotateStarted == false)
+            {
+                cameraRotateStarted = true;
+                firstpoint = first_touch;
+                xAngTemp = xAngle;
+                yAngTemp = yAngle;
+            }
+            secondpoint = second_touch;
+
+            xAngle = (float)(xAngTemp + (secondpoint.x - firstpoint.x) * 180.0 / Screen.width);
+            yAngle = (float)(yAngTemp - (secondpoint.y - firstpoint.y) * 90.0 / Screen.height);
+
+            Camera.main.transform.rotation = Quaternion.Euler(yAngle*-1, xAngle*-1, 0.0f);
+        }
+    }
+
+    public void cameraRotateEnded()
+    {
+        cameraRotateStarted = false;
+    }
+
+
+    public void objectRotate(float angle)
     {
 
-        if (!rotateStarted)
+        if (!objectRotateStarted)
         {
-            rotateStarted = true;
+            objectRotateStarted = true;
             if (selectedObject != null)
-                startingOrientaton = ((MonoBehaviour)selectedObject).transform.rotation;
+                objectStartingOrientaton = ((MonoBehaviour)selectedObject).transform.rotation;
         }
         else
         {
             angle = angle * Mathf.Rad2Deg;
             if (selectedObject != null)
-                ((MonoBehaviour)selectedObject).transform.rotation = startingOrientaton * Quaternion.AngleAxis(angle, Camera.main.transform.forward);
+                ((MonoBehaviour)selectedObject).transform.rotation = objectStartingOrientaton * Quaternion.AngleAxis(angle, Camera.main.transform.forward);
         }
     }
 
-    public void rotateEnded()
+    public void objectRotateEnded()
     {
-        rotateStarted = false;
+        objectRotateStarted = false;
     }
 
     public void tap(Vector2 position)
@@ -116,8 +198,12 @@ public class TouchManagement : MonoBehaviour, ITouchController
             }
             else
             {
-                selectedObject.select_toggle(false);
-                selectedObject = null;
+                if(selectedObject != null)
+                {
+                    selectedObject.select_toggle(false);
+                    selectedObject = null;
+                }
+                
             }
 
         }
