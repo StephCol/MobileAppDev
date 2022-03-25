@@ -79,6 +79,11 @@ public class GestureIdentifier : MonoBehaviour
                         has_moved = false;
                         hit_position = first_touch.position;
                         camera_position = Camera.main.transform.position;
+                        if(first_touch.tapCount == 2)
+                        {
+                            foreach (ITouchController manager in managers)
+                                manager.cameraReset();
+                        }
                         break;
                     case TouchPhase.Moved:
                         has_moved = true;

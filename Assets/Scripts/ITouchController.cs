@@ -17,4 +17,6 @@ public interface ITouchController
     void cameraRotateEnded();
     void cameraZoom(Touch first_touch, Touch second_touch);
     void cameraZoomEnded();
+    void reset();
+    void cameraReset();
 }
