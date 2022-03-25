@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class TouchManagement : MonoBehaviour, ITouchController
@@ -36,6 +34,17 @@ public class TouchManagement : MonoBehaviour, ITouchController
     void Start()
     {
         Camera.main.transform.rotation = Quaternion.Euler(yAngle, xAngle, 0.0f);
+
+    }
+
+    public void reset()
+    {
+        selectedObject = null;
+        objectScaleStarted = false;
+        objectRotateStarted = false;
+        cameraPanStarted = false;
+        cameraRotateStarted = false;
+        cameraZoomStarted = false;
     }
 
     public void dragObject(Vector2 current_position)
@@ -207,5 +216,14 @@ public class TouchManagement : MonoBehaviour, ITouchController
             }
 
         }
+    }
+
+    public void cameraReset()
+    {
+        Camera camera = Camera.main;
+        camera.transform.rotation = Quaternion.Euler(0, 0, 0);
+        camera.transform.position = new Vector3(0f, 0.52f, -15.54f);
+        camera.transform.localScale = new Vector3(1f, 1f, 1f);
+        camera.fieldOfView = 60f;
     }
 }
